@@ -1,0 +1,50 @@
+# Visual Studio / .NET
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Logs
+*.log
+
+# NuGet
+packages/
+*.nupkg
+.nuget/
+
+# IIS/Publish profiles
+*.pubxml.user
+*.pubxml.orig
+*.Publish.xml
+
+# ReSharper / Rider
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# Test results / coverage
+TestResults/
+coverage/
+*.coverage*
+
+# Node (if present)
+node_modules/
+
+# Local config overrides
+appsettings.*.local.json
+
+# EF Core: keep Migrations (do NOT ignore)
+
+# Uploaded product images (keep folder with .gitkeep)
+wwwroot/images/products/*
+!wwwroot/images/products/.gitkeep
+
+
