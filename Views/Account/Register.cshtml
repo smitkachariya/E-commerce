@@ -1,0 +1,171 @@
+@model E_commerce.Models.RegisterViewModel
+@{
+	ViewData["Title"] = "Create Account";
+}
+
+<div class="container py-5" style="max-width: 600px;">
+	<div class="card shadow-lg border-0">
+		<div class="card-header bg-primary text-white text-center py-3">
+			<h2 class="mb-0">
+				<i class="fas fa-user-plus mr-2"></i>Join Our Marketplace
+			</h2>
+		</div>
+		<div class="card-body p-4">
+			<form asp-action="Register" method="post">
+				<div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+				
+				<!-- Name Fields -->
+				<div class="row">
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label asp-for="FirstName" class="form-label font-weight-bold">
+								<i class="fas fa-user mr-1"></i>@Html.DisplayNameFor(m => m.FirstName)
+							</label>
+							<input asp-for="FirstName" class="form-control form-control-lg" placeholder="Enter your first name" />
+							<span asp-validation-for="FirstName" class="text-danger small"></span>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label asp-for="LastName" class="form-label font-weight-bold">
+								<i class="fas fa-user mr-1"></i>@Html.DisplayNameFor(m => m.LastName)
+							</label>
+							<input asp-for="LastName" class="form-control form-control-lg" placeholder="Enter your last name" />
+							<span asp-validation-for="LastName" class="text-danger small"></span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Email -->
+				<div class="mb-3">
+					<label asp-for="Email" class="form-label font-weight-bold">
+						<i class="fas fa-envelope mr-1"></i>@Html.DisplayNameFor(m => m.Email)
+					</label>
+					<input asp-for="Email" class="form-control form-control-lg" placeholder="you@example.com" />
+					<span asp-validation-for="Email" class="text-danger small"></span>
+				</div>
+
+				<!-- Role Selection -->
+				<div class="mb-4">
+					<label asp-for="Role" class="form-label font-weight-bold">
+						<i class="fas fa-users mr-1"></i>@Html.DisplayNameFor(m => m.Role)
+					</label>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="card role-card h-100" data-role="Customer">
+								<div class="card-body text-center p-3">
+									<div class="role-icon mb-2">
+										<i class="fas fa-shopping-cart fa-2x text-success"></i>
+									</div>
+									<h6 class="card-title">Customer</h6>
+									<p class="card-text small text-muted">I want to buy products</p>
+									<div class="form-check">
+										<input asp-for="Role" type="radio" value="Customer" class="form-check-input" id="roleCustomer" />
+										<label class="form-check-label" for="roleCustomer">
+											Choose Customer
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="card role-card h-100" data-role="Seller">
+								<div class="card-body text-center p-3">
+									<div class="role-icon mb-2">
+										<i class="fas fa-store fa-2x text-info"></i>
+									</div>
+									<h6 class="card-title">Seller</h6>
+									<p class="card-text small text-muted">I want to sell products</p>
+									<div class="form-check">
+										<input asp-for="Role" type="radio" value="Seller" class="form-check-input" id="roleSeller" />
+										<label class="form-check-label" for="roleSeller">
+											Choose Seller
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<span asp-validation-for="Role" class="text-danger small"></span>
+				</div>
+
+				<!-- Password Fields -->
+				<div class="row">
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label asp-for="Password" class="form-label font-weight-bold">
+								<i class="fas fa-lock mr-1"></i>Password
+							</label>
+							<input asp-for="Password" class="form-control form-control-lg" />
+							<span asp-validation-for="Password" class="text-danger small"></span>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label asp-for="ConfirmPassword" class="form-label font-weight-bold">
+								<i class="fas fa-lock mr-1"></i>Confirm Password
+							</label>
+							<input asp-for="ConfirmPassword" class="form-control form-control-lg" />
+							<span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+						</div>
+					</div>
+				</div>
+
+				<button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+					<i class="fas fa-user-plus mr-2"></i>Create My Account
+				</button>
+				
+				<div class="text-center">
+					<span class="text-muted">Already have an account? </span>
+					<a asp-controller="Account" asp-action="Login" class="text-decoration-none font-weight-bold">Sign in here</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<style>
+	.role-card {
+		cursor: pointer;
+		transition: all 0.3s ease;
+		border: 2px solid #e9ecef;
+	}
+	.role-card:hover {
+		border-color: #0d6efd;
+		box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+		transform: translateY(-2px);
+	}
+	.role-card.selected {
+		border-color: #0d6efd;
+		background-color: #f8f9ff;
+	}
+	.role-icon {
+		transition: transform 0.3s ease;
+	}
+	.role-card:hover .role-icon {
+		transform: scale(1.1);
+	}
+</style>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+	<script>
+		$(document).ready(function() {
+			// Handle role card selection
+			$('.role-card').click(function() {
+				$('.role-card').removeClass('selected');
+				$(this).addClass('selected');
+				var role = $(this).data('role');
+				$('input[name="Role"][value="' + role + '"]').prop('checked', true);
+			});
+
+			// Handle radio button change
+			$('input[name="Role"]').change(function() {
+				$('.role-card').removeClass('selected');
+				$('.role-card[data-role="' + $(this).val() + '"]').addClass('selected');
+			});
+		});
+	</script>
+}
+
+

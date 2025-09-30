@@ -1,27 +1,122 @@
 ﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
 
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+/* Custom E-commerce Styles */
+:root {
+  --primary-color: #0d6efd;
+  --success-color: #198754;
+  --info-color: #0dcaf0;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
 }
 
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+/* Navbar Styles */
+.navbar-brand {
+  font-weight: 700 !important;
+  font-size: 1.5rem;
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+/* Card Hover Effects */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Role Selection Cards */
+.role-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #e9ecef;
+}
+
+.role-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.role-card.selected {
+  border-color: var(--primary-color);
+  background-color: #f8f9ff;
+}
+
+.role-icon {
+  transition: transform 0.3s ease;
+}
+
+.role-card:hover .role-icon {
+  transform: scale(1.1);
+}
+
+/* Form Enhancements */
+.form-control-lg {
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+}
+
+.form-label {
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+/* Button Enhancements */
+.btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Dashboard Stats Cards */
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+
+/* Alert Styling */
+.alert {
+  border: none;
+  border-radius: 0.75rem;
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  
+  .role-card {
+    margin-bottom: 1rem;
+  }
 }
 
 /* Sticky footer styles

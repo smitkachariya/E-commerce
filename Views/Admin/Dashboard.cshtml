@@ -1,0 +1,121 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 text-danger">
+                    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                </h1>
+                <span class="badge bg-danger fs-6">Administrator</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Stats Overview -->
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">Total Users</p>
+                        </div>
+                        <div class="fs-1 opacity-75">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">Total Products</p>
+                        </div>
+                        <div class="fs-1 opacity-75">
+                            <i class="fas fa-box"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">Total Orders</p>
+                        </div>
+                        <div class="fs-1 opacity-75">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">Sellers</p>
+                        </div>
+                        <div class="fs-1 opacity-75">
+                            <i class="fas fa-store"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <!-- Management Options -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>Management Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-primary">
+                                    <i class="fas fa-users me-2"></i>Manage Users
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-success">
+                                    <i class="fas fa-box me-2"></i>Manage Products
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-info">
+                                    <i class="fas fa-shopping-cart me-2"></i>Manage Orders
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

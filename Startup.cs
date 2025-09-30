@@ -41,7 +41,18 @@ namespace E_commerce
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllersWithViews();
+			services.AddControllersWithViews();
+
+			services.ConfigureApplicationCookie(options =>
+			{
+				options.LoginPath = "/Account/Login";
+				options.LogoutPath = "/Account/Logout";
+				options.AccessDeniedPath = "/Account/Login";
+				options.ExpireTimeSpan = TimeSpan.FromHours(2); // Cookie expires in 2 hours
+				options.SlidingExpiration = true; // Renew cookie on activity
+				options.Cookie.HttpOnly = true; // Security
+				options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
+			});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
