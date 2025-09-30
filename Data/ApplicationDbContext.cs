@@ -29,6 +29,11 @@ namespace E_commerce.Data
 				.Property(o => o.Price)
 				.HasColumnType("decimal(18,2)");
 
+			// Configure Order decimal precision
+			modelBuilder.Entity<Order>()
+				.Property(o => o.TotalAmount)
+				.HasColumnType("decimal(18,2)");
+
 			// Configure relationships
 			modelBuilder.Entity<Product>()
 				.HasOne(p => p.Seller)
@@ -54,6 +59,25 @@ namespace E_commerce.Data
 				.WithMany()
 				.HasForeignKey(ci => ci.ProductId)
 				.OnDelete(DeleteBehavior.Cascade);
+
+			// Configure Order relationships
+			modelBuilder.Entity<Order>()
+				.HasOne(o => o.Customer)
+				.WithMany()
+				.HasForeignKey(o => o.CustomerId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			modelBuilder.Entity<OrderItem>()
+				.HasOne(oi => oi.Order)
+				.WithMany(o => o.Items)
+				.HasForeignKey(oi => oi.OrderId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<OrderItem>()
+				.HasOne(oi => oi.Product)
+				.WithMany()
+				.HasForeignKey(oi => oi.ProductId)
+				.OnDelete(DeleteBehavior.Restrict);
 
 			// Seed categories (optional)
 			modelBuilder.Entity<Product>().HasData();

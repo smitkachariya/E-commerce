@@ -33,14 +33,17 @@
                         </li>
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            @if (User.IsInRole("Customer"))
+                            @if (User.IsInRole("Customer") || !User.IsInRole("Seller"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Cart" asp-action="Index">
+                                    <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
                                         <i class="fas fa-shopping-cart mr-1"></i>Cart
                                         <span id="cart-badge" class="badge badge-primary ml-1" style="display: none;">0</span>
                                     </a>
                                 </li>
+                            }
+                            @if (User.IsInRole("Customer"))
+                            {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Order" asp-action="MyOrders">
                                         <i class="fas fa-box mr-1"></i>My Orders
@@ -131,7 +134,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     
-    @if (User.IsInRole("Customer"))
+    @if (User.Identity.IsAuthenticated && (User.IsInRole("Customer") || !User.IsInRole("Seller")))
     {
         <script>
             // Update cart badge count
@@ -142,13 +145,22 @@
                     } else {
                         $('#cart-badge').hide();
                     }
+                }).fail(function() {
+                    // If cart endpoint fails, hide badge
+                    $('#cart-badge').hide();
                 });
             }
             
             // Update cart badge on page load
             $(document).ready(function() {
                 updateCartBadge();
+                
+                // Update cart badge every 30 seconds to keep it fresh
+                setInterval(updateCartBadge, 30000);
             });
+            
+            // Global function to update cart badge after adding items
+            window.refreshCartBadge = updateCartBadge;
         </script>
     }
     

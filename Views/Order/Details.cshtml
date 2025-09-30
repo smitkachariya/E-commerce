@@ -1,0 +1,322 @@
+@model E_commerce.Models.Order
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Header -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-receipt mr-2"></i>Order Details
+                        </h4>
+                        <div>
+                            @switch (Model.Status)
+                            {
+                                case E_commerce.Models.OrderStatus.Pending:
+                                    <span class="badge badge-warning badge-lg">Pending</span>
+                                    break;
+                                case E_commerce.Models.OrderStatus.Processing:
+                                    <span class="badge badge-info badge-lg">Processing</span>
+                                    break;
+                                case E_commerce.Models.OrderStatus.Shipped:
+                                    <span class="badge badge-primary badge-lg">Shipped</span>
+                                    break;
+                                case E_commerce.Models.OrderStatus.Delivered:
+                                    <span class="badge badge-success badge-lg">Delivered</span>
+                                    break;
+                                case E_commerce.Models.OrderStatus.Cancelled:
+                                    <span class="badge badge-danger badge-lg">Cancelled</span>
+                                    break;
+                                default:
+                                    <span class="badge badge-secondary badge-lg">@Model.Status</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Order Number</h6>
+                            <p class="font-weight-bold">@Model.OrderNumber</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Order Date</h6>
+                            <p>@Model.OrderDate.ToString("MMMM dd, yyyy 'at' hh:mm tt")</p>
+                        </div>
+                    </div>
+
+                    @if (Model.Status == E_commerce.Models.OrderStatus.Shipped && Model.ShippedDate.HasValue)
+                    {
+                        <div class="alert alert-info">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-info">Shipped Date</h6>
+                                    <p class="mb-0">@Model.ShippedDate.Value.ToString("MMMM dd, yyyy")</p>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                                {
+                                    <div class="col-md-6">
+                                        <h6 class="text-info">Tracking Number</h6>
+                                        <p class="mb-0 font-weight-bold">@Model.TrackingNumber</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == E_commerce.Models.OrderStatus.Delivered && Model.DeliveredDate.HasValue)
+                    {
+                        <div class="alert alert-success">
+                            <h6 class="text-success">Delivered</h6>
+                            <p class="mb-0">Your order was delivered on @Model.DeliveredDate.Value.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Items Ordered (@Model.Items.Count)</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="row align-items-center py-3 @(item != Model.Items.Last() ? "border-bottom" : "")">
+                            <div class="col-md-2">
+                                @if (!string.IsNullOrEmpty(item.ProductImagePath))
+                                {
+                                    <img src="@item.ProductImagePath" 
+                                         alt="@item.ProductName" 
+                                         class="img-fluid rounded" 
+                                         style="max-height: 80px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="bg-light border rounded d-flex align-items-center justify-content-center" 
+                                         style="height: 80px;">
+                                        <i class="fas fa-image text-muted fa-2x"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-5">
+                                <h6 class="mb-1">@item.ProductName</h6>
+                                <p class="text-muted mb-1">@item.ProductCategory</p>
+                                <small class="text-muted">Price: @item.Price.ToString("C")</small>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <strong>Qty: @item.Quantity</strong>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <h6 class="mb-0">@item.SubTotal.ToString("C")</h6>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Order Notes -->
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Order Notes</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.Notes</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="col-md-4">
+            <!-- Order Total -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>@Model.SubTotal.ToString("C")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span class="text-success">@Model.ShippingCost.ToString("C")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span>@Model.Tax.ToString("C")</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong class="text-primary h5">@Model.Total.ToString("C")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shipping-fast mr-2"></i>Shipping Address
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>@Model.ContactName</strong></p>
+                    <p class="mb-1">@Model.ShippingAddress</p>
+                    <p class="mb-1">@Model.ShippingCity, @Model.ShippingPostalCode</p>
+                    <p class="mb-3">@Model.ShippingCountry</p>
+                    
+                    <h6 class="text-muted">Contact</h6>
+                    <p class="mb-1">
+                        <i class="fas fa-envelope mr-2"></i>@Model.ContactEmail
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-phone mr-2"></i>@Model.ContactPhone
+                    </p>
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history mr-2"></i>Order Timeline
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Order Placed</h6>
+                                <p class="timeline-text">@Model.OrderDate.ToString("MMM dd, hh:mm tt")</p>
+                            </div>
+                        </div>
+                        
+                        @if (Model.Status >= E_commerce.Models.OrderStatus.Processing)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Processing</h6>
+                                    <p class="timeline-text">Your order is being prepared</p>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (Model.Status >= E_commerce.Models.OrderStatus.Shipped && Model.ShippedDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Shipped</h6>
+                                    <p class="timeline-text">@Model.ShippedDate.Value.ToString("MMM dd, hh:mm tt")</p>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (Model.Status == E_commerce.Models.OrderStatus.Delivered && Model.DeliveredDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Delivered</h6>
+                                    <p class="timeline-text">@Model.DeliveredDate.Value.ToString("MMM dd, hh:mm tt")</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <a asp-action="MyOrders" class="btn btn-outline-primary btn-block mb-2">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to My Orders
+                    </a>
+                    @if (Model.Status == E_commerce.Models.OrderStatus.Pending)
+                    {
+                        <button class="btn btn-outline-danger btn-block" onclick="cancelOrder(@Model.OrderId)">
+                            <i class="fas fa-times mr-1"></i>Cancel Order
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .badge-lg {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -1.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 2px #e9ecef;
+        }
+        
+        .timeline-content {
+            padding-left: 1rem;
+        }
+        
+        .timeline-title {
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .timeline-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                // Future implementation for order cancellation
+                alert('Order cancellation feature will be implemented soon.');
+            }
+        }
+    </script>
+}

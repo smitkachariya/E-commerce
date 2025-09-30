@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace E_commerce.Controllers
 {
-    [Authorize(Roles = "Customer")]
+    [Authorize]
     public class CartController : Controller
     {
         private readonly ApplicationDbContext _context;

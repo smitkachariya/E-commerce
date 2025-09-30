@@ -1,0 +1,178 @@
+@model List<E_commerce.Models.Order>
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-box mr-2"></i>My Orders</h2>
+                    <p class="text-muted">Track and manage your orders</p>
+                </div>
+                <div>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag mr-1"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle mr-2"></i>@TempData["Success"]
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
+                    <h4 class="text-muted">No Orders Yet</h4>
+                    <p class="text-muted">You haven't placed any orders yet. Start shopping to see your orders here.</p>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-bag mr-2"></i>Start Shopping
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var order in Model)
+                    {
+                        <div class="col-md-12 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3">
+                                            <small class="text-muted">Order Number</small><br>
+                                            <strong>@order.OrderNumber</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted">Order Date</small><br>
+                                            <span>@order.OrderDate.ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <small class="text-muted">Total</small><br>
+                                            <strong class="text-primary">@order.Total.ToString("C")</strong>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <small class="text-muted">Status</small><br>
+                                            @switch (order.Status)
+                                            {
+                                                case E_commerce.Models.OrderStatus.Pending:
+                                                    <span class="badge badge-warning">Pending</span>
+                                                    break;
+                                                case E_commerce.Models.OrderStatus.Processing:
+                                                    <span class="badge badge-info">Processing</span>
+                                                    break;
+                                                case E_commerce.Models.OrderStatus.Shipped:
+                                                    <span class="badge badge-primary">Shipped</span>
+                                                    break;
+                                                case E_commerce.Models.OrderStatus.Delivered:
+                                                    <span class="badge badge-success">Delivered</span>
+                                                    break;
+                                                case E_commerce.Models.OrderStatus.Cancelled:
+                                                    <span class="badge badge-danger">Cancelled</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge badge-secondary">@order.Status</span>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="col-md-2 text-right">
+                                            <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye mr-1"></i>View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        @foreach (var item in order.Items.Take(3))
+                                        {
+                                            <div class="col-md-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="mr-3">
+                                                        @if (!string.IsNullOrEmpty(item.ProductImagePath))
+                                                        {
+                                                            <img src="@item.ProductImagePath" 
+                                                                 alt="@item.ProductName" 
+                                                                 class="img-thumbnail" 
+                                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="bg-light border rounded d-flex align-items-center justify-content-center" 
+                                                                 style="width: 50px; height: 50px;">
+                                                                <i class="fas fa-image text-muted"></i>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1">@item.ProductName</h6>
+                                                        <small class="text-muted">Qty: @item.Quantity</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (order.Items.Count > 3)
+                                        {
+                                            <div class="col-md-4 d-flex align-items-center">
+                                                <span class="text-muted">
+                                                    <i class="fas fa-plus mr-1"></i>
+                                                    @(order.Items.Count - 3) more item@(order.Items.Count - 3 == 1 ? "" : "s")
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    @if (order.Status == E_commerce.Models.OrderStatus.Shipped && order.ShippedDate.HasValue)
+                                    {
+                                        <div class="alert alert-info mt-3 mb-0">
+                                            <i class="fas fa-truck mr-2"></i>
+                                            <strong>Shipped on @order.ShippedDate.Value.ToString("MMM dd, yyyy")</strong>
+                                            @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                            {
+                                                <span class="ml-2">Tracking: @order.TrackingNumber</span>
+                                            }
+                                        </div>
+                                    }
+                                    @if (order.Status == E_commerce.Models.OrderStatus.Delivered && order.DeliveredDate.HasValue)
+                                    {
+                                        <div class="alert alert-success mt-3 mb-0">
+                                            <i class="fas fa-check-circle mr-2"></i>
+                                            <strong>Delivered on @order.DeliveredDate.Value.ToString("MMM dd, yyyy")</strong>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination (if needed in future) -->
+                @if (Model.Count > 10)
+                {
+                    <nav aria-label="Orders navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Previous</a>
+                            </li>
+                            <li class="page-item active">
+                                <a class="page-link" href="#">1</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+        </div>
+    </div>
+</div>
