@@ -1,13 +1,144 @@
+@model IEnumerable<E_commerce.Models.Product>
 @{
     ViewData["Title"] = "Products";
 }
 
 <div class="container py-4">
-    <div class="text-center">
-        <h2>@ViewBag.Message</h2>
-        <p class="text-muted">This page will show all available products for browsing and purchasing.</p>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-            <i class="fas fa-home me-2"></i>Back to Home
-        </a>
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-th-large mr-2"></i>Product Catalog</h2>
+            <p class="text-muted">Browse our amazing collection of products</p>
+        </div>
+        <div class="col-md-4 text-right">
+            @if (User.IsInRole("Seller"))
+            {
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus mr-1"></i>Add Product
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label for="searchString">Search Products</label>
+                                <input type="text" name="searchString" class="form-control" 
+                                       value="@ViewBag.CurrentSearch" placeholder="Search by name or description...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select name="category" class="form-control">
+                                    <option value="">All Categories</option>
+                                    @foreach (var cat in ViewBag.Categories)
+                                    {
+                                        <option value="@cat" selected="@(cat == ViewBag.CurrentCategory)">@cat</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>&nbsp;</label><br>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search mr-1"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row">
+        @if (Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 product-card">
+                        <div class="card-img-container" style="height: 200px; overflow: hidden;">
+                            @if (product.Images.Any())
+                            {
+                                <img src="@product.Images.First().ImagePath" class="card-img-top" 
+                                     alt="@product.Name" style="height: 100%; width: 100%; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text text-muted small flex-grow-1">
+                                @(product.Description.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description)
+                            </p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="h5 text-success mb-0">$@product.Price.ToString("F2")</span>
+                                    <small class="text-muted">@product.Category</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">Stock: @product.Stock</small>
+                                    <small class="text-muted">By: @product.Seller.UserName</small>
+                                </div>
+                                <div class="btn-group w-100">
+                                    <a asp-action="Details" asp-route-id="@product.ProductId" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye mr-1"></i>View
+                                    </a>
+                                    @if (User.IsInRole("Customer") && product.Stock > 0)
+                                    {
+                                        <a href="#" class="btn btn-success btn-sm">
+                                            <i class="fas fa-cart-plus mr-1"></i>Add to Cart
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No products found</h4>
+                    <p class="text-muted">Try adjusting your search criteria or browse all categories.</p>
+                    @if (User.IsInRole("Seller"))
+                    {
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus mr-1"></i>Add Your First Product
+                        </a>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+<style>
+.product-card {
+    transition: transform 0.2s ease-in-out;
+    border: 1px solid #dee2e6;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+</style>

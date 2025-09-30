@@ -1,0 +1,193 @@
+@model E_commerce.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">Products</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-md-6">
+            @if (Model.Images.Any())
+            {
+                <div id="productCarousel" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner">
+                        @for (int i = 0; i < Model.Images.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <img src="@Model.Images[i].ImagePath" class="d-block w-100" 
+                                     alt="@Model.Name" style="height: 400px; object-fit: cover;">
+                            </div>
+                        }
+                    </div>
+                    @if (Model.Images.Count > 1)
+                    {
+                        <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </a>
+                        <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </a>
+                    }
+                </div>
+                
+                <!-- Thumbnail Navigation -->
+                @if (Model.Images.Count > 1)
+                {
+                    <div class="row mt-3">
+                        @for (int i = 0; i < Model.Images.Count; i++)
+                        {
+                            <div class="col-3">
+                                <img src="@Model.Images[i].ImagePath" class="img-thumbnail thumbnail-nav" 
+                                     alt="@Model.Name" data-target="#productCarousel" data-slide-to="@i"
+                                     style="height: 80px; object-fit: cover; cursor: pointer;">
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <i class="fas fa-image fa-5x text-muted"></i>
+                </div>
+            }
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <div class="product-info">
+                <h1 class="h2 mb-3">@Model.Name</h1>
+                
+                <div class="mb-3">
+                    <span class="badge badge-secondary mr-2">@Model.Category</span>
+                    @if (Model.Stock > 0)
+                    {
+                        <span class="badge badge-success">In Stock (@Model.Stock available)</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Out of Stock</span>
+                    }
+                </div>
+
+                <div class="price-section mb-4">
+                    <h3 class="text-success mb-0">$@Model.Price.ToString("F2")</h3>
+                </div>
+
+                <div class="seller-info mb-4">
+                    <h6 class="text-muted">Sold by:</h6>
+                    <p class="mb-0">
+                        <i class="fas fa-store mr-1"></i>
+                        <strong>@Model.Seller.UserName</strong>
+                    </p>
+                </div>
+
+                <!-- Add to Cart Section -->
+                @if (User.IsInRole("Customer"))
+                {
+                    @if (Model.Stock > 0)
+                    {
+                        <div class="add-to-cart-section mb-4">
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                <div class="row">
+                                    <div class="col-4">
+                                        <label for="quantity">Quantity:</label>
+                                        <input type="number" name="quantity" id="quantity" class="form-control" 
+                                               value="1" min="1" max="@Model.Stock">
+                                    </div>
+                                    <div class="col-8">
+                                        <label>&nbsp;</label><br>
+                                        <button type="submit" class="btn btn-success btn-lg btn-block">
+                                            <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            This product is currently out of stock.
+                        </div>
+                    }
+                }
+                else if (!User.Identity.IsAuthenticated)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <a asp-controller="Account" asp-action="Login">Login</a> to add this product to your cart.
+                    </div>
+                }
+
+                <!-- Seller Actions -->
+                @if (User.IsInRole("Seller") && Model.SellerId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                {
+                    <div class="seller-actions mb-4">
+                        <h6 class="text-muted">Seller Actions:</h6>
+                        <div class="btn-group">
+                            <a asp-action="Edit" asp-route-id="@Model.ProductId" class="btn btn-primary">
+                                <i class="fas fa-edit mr-1"></i>Edit Product
+                            </a>
+                            <a asp-action="MyProducts" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>My Products
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Description -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Product Description</h5>
+                </div>
+                <div class="card-body">
+                    <p class="lead">@Model.Description</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products (placeholder for future) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h5>You might also like</h5>
+            <p class="text-muted">Related products feature coming soon...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.thumbnail-nav {
+    transition: opacity 0.3s;
+}
+
+.thumbnail-nav:hover {
+    opacity: 0.7;
+}
+
+.product-info {
+    padding: 20px 0;
+}
+
+.price-section {
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+    padding: 20px 0;
+}
+</style>

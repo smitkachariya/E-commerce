@@ -38,6 +38,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Cart" asp-action="Index">
                                         <i class="fas fa-shopping-cart mr-1"></i>Cart
+                                        <span id="cart-badge" class="badge badge-primary ml-1" style="display: none;">0</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -129,6 +130,28 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @if (User.IsInRole("Customer"))
+    {
+        <script>
+            // Update cart badge count
+            function updateCartBadge() {
+                $.get('@Url.Action("GetCartItemCount", "Cart")', function(count) {
+                    if (count > 0) {
+                        $('#cart-badge').text(count).show();
+                    } else {
+                        $('#cart-badge').hide();
+                    }
+                });
+            }
+            
+            // Update cart badge on page load
+            $(document).ready(function() {
+                updateCartBadge();
+            });
+        </script>
+    }
+    
     @RenderSection("Scripts", required: false)
 </body>
 </html>
