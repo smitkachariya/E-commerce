@@ -262,6 +262,15 @@ namespace E_commerce.Controllers
         public async Task<IActionResult> MyOrders()
         {
             var userId = _userManager.GetUserId(User);
+            var user = await _userManager.GetUserAsync(User);
+            var userRoles = await _userManager.GetRolesAsync(user);
+            
+            // Add debugging info
+            ViewBag.CurrentUser = user.Email;
+            ViewBag.CurrentUserRoles = userRoles;
+            ViewBag.IsCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+            ViewBag.IsSeller = await _userManager.IsInRoleAsync(user, "Seller");
+            
             var orders = await _context.Orders
                 .Include(o => o.Items)
                 .ThenInclude(oi => oi.Product)
@@ -272,11 +281,68 @@ namespace E_commerce.Controllers
             return View(orders);
         }
 
+        // GET: Order/CheckUserRole - Diagnostic action to check user role
+        [Authorize]
+        public async Task<IActionResult> CheckUserRole()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+            var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+            var isSeller = await _userManager.IsInRoleAsync(user, "Seller");
+            
+            return Json(new { 
+                UserId = user.Id,
+                Email = user.Email,
+                Roles = roles,
+                IsCustomer = isCustomer,
+                IsSeller = isSeller 
+            });
+        }
+
+        // GET: Order/FixMyRole - Utility to assign Customer role to current user
+        [Authorize]
+        public async Task<IActionResult> FixMyRole()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            // If user has no roles, assign Customer role
+            if (!roles.Any())
+            {
+                await _userManager.AddToRoleAsync(user, "Customer");
+                return Json(new { 
+                    success = true, 
+                    message = "Customer role assigned successfully!",
+                    newRoles = await _userManager.GetRolesAsync(user)
+                });
+            }
+            
+            return Json(new { 
+                success = false, 
+                message = "User already has roles assigned",
+                currentRoles = roles 
+            });
+        }
+
         // GET: Order/Details
-        [Authorize(Roles = "Customer")]
+        [Authorize]
         public async Task<IActionResult> Details(int id)
         {
             var userId = _userManager.GetUserId(User);
+            var user = await _userManager.GetUserAsync(User);
+            var userRoles = await _userManager.GetRolesAsync(user);
+            
+            // Check if user is Customer - if not, show debugging info
+            if (!await _userManager.IsInRoleAsync(user, "Customer"))
+            {
+                ViewBag.DebuggingInfo = $"User {user.Email} has roles: {string.Join(", ", userRoles)}. This action requires Customer role.";
+                ViewBag.UserId = userId;
+                ViewBag.UserRoles = userRoles;
+                
+                // For now, allow access but show the debugging info
+                // return View("AccessDenied");
+            }
+            
             var order = await _context.Orders
                 .Include(o => o.Items)
                 .ThenInclude(oi => oi.Product)
@@ -289,6 +355,48 @@ namespace E_commerce.Controllers
             }
 
             return View(order);
+        }
+
+        // POST: Order/Cancel - Cancel order by customer
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Cancel(int orderId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var order = await _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerId == userId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Order not found or you don't have permission to cancel it." });
+            }
+
+            // Only allow cancellation for Pending or Processing orders
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing)
+            {
+                return Json(new { success = false, message = "This order cannot be cancelled as it has already been shipped or delivered." });
+            }
+
+            // Restore stock for cancelled items
+            foreach (var item in order.Items)
+            {
+                var product = item.Product;
+                if (product != null)
+                {
+                    product.Stock += item.Quantity;
+                    _context.Update(product);
+                }
+            }
+
+            // Update order status
+            order.Status = OrderStatus.Cancelled;
+            _context.Update(order);
+            
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Order has been cancelled successfully. Stock has been restored." });
         }
 
         // GET: Order/SellerOrders

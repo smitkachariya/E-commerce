@@ -1,0 +1,567 @@
+@model List<E_commerce.Models.ProductInventoryViewModel>
+@{
+    ViewData["Title"] = "Inventory Manager";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-boxes text-primary"></i> Inventory Manager</h1>
+                <div class="btn-group" role="group">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a asp-controller="Products" asp-action="Create" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add New Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Inventory Value
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Sum(p => p.CurrentInventoryValue).ToString("F2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Products
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Count
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Low Stock Items
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Count(p => p.StockStatus == "Low Stock" || p.StockStatus == "Out of Stock")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Sum(p => p.TotalRevenue).ToString("F2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="searchProduct">Search Products:</label>
+                                <input type="text" class="form-control" id="searchProduct" placeholder="Enter product name...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filterStock">Stock Status:</label>
+                                <select class="form-control" id="filterStock">
+                                    <option value="">All Products</option>
+                                    <option value="Out of Stock">Out of Stock</option>
+                                    <option value="Low Stock">Low Stock</option>
+                                    <option value="Medium Stock">Medium Stock</option>
+                                    <option value="Good Stock">Good Stock</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filterCategory">Category:</label>
+                                <select class="form-control" id="filterCategory">
+                                    <option value="">All Categories</option>
+                                    @foreach (var category in Model.Select(p => p.Product.Category).Distinct().OrderBy(c => c))
+                                    {
+                                        <option value="@category">@category</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <button class="btn btn-primary btn-block" onclick="applyFilters()">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list"></i> Product Inventory Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="inventoryTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Current Stock</th>
+                                    <th>Inventory Value</th>
+                                    <th>Total Sold</th>
+                                    <th>Total Revenue</th>
+                                    <th>Avg Sales/Month</th>
+                                    <th>Restock Rec.</th>
+                                    <th>Last Sale</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr data-category="@item.Product.Category" data-stock-status="@item.StockStatus">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (item.Product.Images.Any())
+                                                {
+                                                    <img src="@item.Product.Images.First().ImagePath" alt="@item.Product.Name" 
+                                                         class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                }
+                                                <div>
+                                                    <div class="font-weight-bold">@item.Product.Name</div>
+                                                    <small class="text-muted">ID: @item.Product.ProductId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary">@item.Product.Category</span>
+                                        </td>
+                                        <td class="font-weight-bold text-primary">@item.Product.Price.ToString("F2")</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge @item.GetStockStatusClass() mr-2">
+                                                    @item.Product.Stock
+                                                </span>
+                                                <small class="text-muted">@item.StockStatus</small>
+                                            </div>
+                                        </td>
+                                        <td class="font-weight-bold text-success">@item.CurrentInventoryValue.ToString("F2")</td>
+                                        <td>@item.TotalSold</td>
+                                        <td class="font-weight-bold text-success">@item.TotalRevenue.ToString("F2")</td>
+                                        <td>@item.AverageSalesPerMonth.ToString("F1")</td>
+                                        <td>
+                                            @if (item.RecommendedRestock > 0)
+                                            {
+                                                <span class="badge badge-warning">+@item.RecommendedRestock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">
+                                                    <i class="fas fa-check"></i> Good
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.LastSaleDate.HasValue)
+                                            {
+                                                <span>@item.LastSaleDate.Value.ToString("MMM dd, yyyy")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Never</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-primary" 
+                                                        onclick="showQuickStockUpdate(@item.Product.ProductId, '@item.Product.Name', @item.Product.Stock, @item.Product.Price)"
+                                                        title="Quick Stock Update">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Product.ProductId" 
+                                                   class="btn btn-sm btn-outline-primary" title="Edit Product">
+                                                    <i class="fas fa-cog"></i>
+                                                </a>
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@item.Product.ProductId" 
+                                                   class="btn btn-sm btn-outline-info" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stock Update Modal -->
+<div class="modal fade" id="quickStockModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-box"></i> Quick Stock Update
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="quickStockForm">
+                    <input type="hidden" id="modalProductId" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Product Name:</label>
+                                <p class="font-weight-bold h5" id="modalProductName"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Product Price:</label>
+                                <p class="font-weight-bold h5 text-primary" id="modalProductPrice"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Current Stock:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-box"></i></span>
+                                    </div>
+                                    <input type="number" class="form-control" id="modalCurrentStock" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>New Stock Amount:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="adjustStock(-1)">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <input type="number" class="form-control text-center" id="modalNewStock" min="0" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="adjustStock(1)">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Stock Change:</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-exchange-alt"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control font-weight-bold" id="modalStockChange" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Current Inventory Value:</label>
+                                <div class="h4 text-info" id="modalCurrentValue">0.00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>New Inventory Value:</label>
+                                <div class="h4 text-success" id="modalNewValue">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modalReason">Reason for Stock Change (Optional):</label>
+                        <select class="form-control" id="modalReason">
+                            <option value="">Select reason...</option>
+                            <option value="New Inventory">New Inventory Received</option>
+                            <option value="Inventory Count">Physical Inventory Count</option>
+                            <option value="Damaged Goods">Damaged/Defective Items</option>
+                            <option value="Promotional Stock">Promotional Stock</option>
+                            <option value="Return to Supplier">Return to Supplier</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-success" onclick="updateProductStock()">
+                    <i class="fas fa-save"></i> Update Stock
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentModalPrice = 0;
+        let originalStock = 0;
+
+        // Search and Filter Functions
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+            const stockFilter = document.getElementById('filterStock').value;
+            const categoryFilter = document.getElementById('filterCategory').value;
+            
+            const rows = document.querySelectorAll('#inventoryTable tbody tr');
+            
+            rows.forEach(row => {
+                const productName = row.querySelector('td:first-child .font-weight-bold').textContent.toLowerCase();
+                const stockStatus = row.getAttribute('data-stock-status');
+                const category = row.getAttribute('data-category');
+                
+                let showRow = true;
+                
+                // Search filter
+                if (searchTerm && !productName.includes(searchTerm)) {
+                    showRow = false;
+                }
+                
+                // Stock status filter
+                if (stockFilter && stockStatus !== stockFilter) {
+                    showRow = false;
+                }
+                
+                // Category filter
+                if (categoryFilter && category !== categoryFilter) {
+                    showRow = false;
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        // Real-time search
+        document.getElementById('searchProduct').addEventListener('input', applyFilters);
+        document.getElementById('filterStock').addEventListener('change', applyFilters);
+        document.getElementById('filterCategory').addEventListener('change', applyFilters);
+
+        // Stock Update Modal Functions
+        function showQuickStockUpdate(productId, productName, currentStock, price) {
+            document.getElementById('modalProductId').value = productId;
+            document.getElementById('modalProductName').textContent = productName;
+            document.getElementById('modalProductPrice').textContent = price.toFixed(2);
+            document.getElementById('modalCurrentStock').value = currentStock;
+            document.getElementById('modalNewStock').value = currentStock;
+            
+            currentModalPrice = price;
+            originalStock = currentStock;
+            
+            updateModalValues();
+            $('#quickStockModal').modal('show');
+        }
+
+        function adjustStock(change) {
+            const newStockInput = document.getElementById('modalNewStock');
+            const currentValue = parseInt(newStockInput.value) || 0;
+            const newValue = Math.max(0, currentValue + change);
+            newStockInput.value = newValue;
+            updateModalValues();
+        }
+
+        function updateModalValues() {
+            const currentStock = originalStock;
+            const newStock = parseInt(document.getElementById('modalNewStock').value) || 0;
+            const stockChange = newStock - currentStock;
+            
+            // Update stock change display
+            const stockChangeElement = document.getElementById('modalStockChange');
+            stockChangeElement.value = (stockChange >= 0 ? '+' : '') + stockChange;
+            stockChangeElement.className = 'form-control font-weight-bold ' + 
+                (stockChange > 0 ? 'text-success' : stockChange < 0 ? 'text-danger' : 'text-muted');
+            
+            // Update inventory values
+            const currentValue = currentStock * currentModalPrice;
+            const newValue = newStock * currentModalPrice;
+            
+            document.getElementById('modalCurrentValue').textContent = currentValue.toFixed(2);
+            document.getElementById('modalNewValue').textContent = newValue.toFixed(2);
+        }
+
+        // Event listener for new stock input
+        document.getElementById('modalNewStock').addEventListener('input', updateModalValues);
+
+        function updateProductStock() {
+            const productId = document.getElementById('modalProductId').value;
+            const newStock = document.getElementById('modalNewStock').value;
+            const reason = document.getElementById('modalReason').value;
+
+            if (!newStock || newStock < 0) {
+                alert('Please enter a valid stock amount.');
+                return;
+            }
+
+            fetch('@Url.Action("UpdateStock", "SellerDashboard")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: `productId=${productId}&newStock=${newStock}&reason=${encodeURIComponent(reason)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    $('#quickStockModal').modal('hide');
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <i class="fas fa-check-circle"></i> ${data.message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    `;
+                    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+                    
+                    // Refresh the page after a short delay
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating stock.');
+            });
+        }
+
+        // Auto-refresh every 10 minutes
+        setTimeout(function() {
+            location.reload();
+        }, 600000);
+    </script>
+}
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .badge-success {
+        background-color: #1cc88a;
+    }
+    .badge-warning {
+        background-color: #f6c23e;
+    }
+    .badge-danger {
+        background-color: #e74a3b;
+    }
+    .badge-info {
+        background-color: #36b9cc;
+    }
+    
+    .card {
+        transition: transform 0.15s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+    }
+</style>

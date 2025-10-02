@@ -177,6 +177,30 @@ namespace E_commerce.Controllers
                 product.Category = model.Category;
                 product.Stock = model.Stock;
 
+                // Handle image deletion
+                if (Request.Form.ContainsKey("ImagesToDelete"))
+                {
+                    var imagesToDelete = Request.Form["ImagesToDelete"].ToArray();
+                    foreach (var imagePath in imagesToDelete)
+                    {
+                        var imageToDelete = await _context.ProductImages
+                            .FirstOrDefaultAsync(pi => pi.ProductId == product.ProductId && pi.ImagePath == imagePath);
+                        
+                        if (imageToDelete != null)
+                        {
+                            // Delete from file system
+                            var fullPath = Path.Combine(_environment.WebRootPath, imagePath.TrimStart('/'));
+                            if (System.IO.File.Exists(fullPath))
+                            {
+                                System.IO.File.Delete(fullPath);
+                            }
+                            
+                            // Delete from database
+                            _context.ProductImages.Remove(imageToDelete);
+                        }
+                    }
+                }
+
                 _context.Update(product);
                 await _context.SaveChangesAsync();
 

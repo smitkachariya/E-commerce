@@ -117,7 +117,7 @@ namespace E_commerce.Controllers
             await _context.SaveChangesAsync();
 
             var newSubtotal = cartItem.Product.Price * quantity;
-            return Json(new { success = true, newSubtotal = newSubtotal.ToString("C") });
+            return Json(new { success = true, newSubtotal = newSubtotal.ToString("F2") });
         }
 
         // POST: Cart/RemoveItem

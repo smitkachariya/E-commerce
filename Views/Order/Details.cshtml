@@ -3,6 +3,16 @@
     ViewData["Title"] = "Order Details";
 }
 
+@if (ViewBag.DebuggingInfo != null)
+{
+    <div class="alert alert-info">
+        <h5>Debugging Information:</h5>
+        <p>@ViewBag.DebuggingInfo</p>
+        <p>User ID: @ViewBag.UserId</p>
+        <p>User Roles: @string.Join(", ", (IEnumerable<string>)ViewBag.UserRoles)</p>
+    </div>
+}
+
 <div class="container py-4">
     <div class="row">
         <div class="col-md-8">
@@ -107,13 +117,13 @@
                             <div class="col-md-5">
                                 <h6 class="mb-1">@item.ProductName</h6>
                                 <p class="text-muted mb-1">@item.ProductCategory</p>
-                                <small class="text-muted">Price: @item.Price.ToString("C")</small>
+                                <small class="text-muted">Price: @item.Price.ToString("F2")</small>
                             </div>
                             <div class="col-md-2 text-center">
                                 <strong>Qty: @item.Quantity</strong>
                             </div>
                             <div class="col-md-3 text-right">
-                                <h6 class="mb-0">@item.SubTotal.ToString("C")</h6>
+                                <h6 class="mb-0">@item.SubTotal.ToString("F2")</h6>
                             </div>
                         </div>
                     }
@@ -144,20 +154,20 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal:</span>
-                        <span>@Model.SubTotal.ToString("C")</span>
+                        <span>@Model.SubTotal.ToString("F2")</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Shipping:</span>
-                        <span class="text-success">@Model.ShippingCost.ToString("C")</span>
+                        <span class="text-success">@Model.ShippingCost.ToString("F2")</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tax:</span>
-                        <span>@Model.Tax.ToString("C")</span>
+                        <span>@Model.Tax.ToString("F2")</span>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between">
                         <strong>Total:</strong>
-                        <strong class="text-primary h5">@Model.Total.ToString("C")</strong>
+                        <strong class="text-primary h5">@Model.Total.ToString("F2")</strong>
                     </div>
                 </div>
             </div>

@@ -80,7 +80,7 @@
                                             <p class="text-muted small mb-0">@item.Product.Category</p>
                                         </div>
                                         <div class="col-md-2">
-                                            <strong>@item.Product.Price.ToString("C")</strong>
+                                            <strong>@item.Product.Price.ToString("F2")</strong>
                                         </div>
                                         <div class="col-md-2">
                                             <div class="input-group input-group-sm">
@@ -96,7 +96,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <strong id="subtotal-@item.Id">@((item.Product.Price * item.Quantity).ToString("C"))</strong>
+                                                <strong id="subtotal-@item.Id">@((item.Product.Price * item.Quantity).ToString("F2"))</strong>
                                                 <form asp-action="RemoveItem" method="post" class="d-inline ml-2" onsubmit="return confirm('Remove this item from cart?')">
                                                     <input type="hidden" name="cartItemId" value="@item.Id" />
                                                     <button type="submit" class="btn btn-outline-danger btn-sm">
@@ -118,7 +118,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Subtotal (@Model.Sum(x => x.Quantity) items):</span>
-                                    <strong id="cart-total">@ViewBag.Total.ToString("C")</strong>
+                                    <strong id="cart-total">@ViewBag.Total.ToString("F2")</strong>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Shipping:</span>
@@ -127,19 +127,19 @@
                                 <hr>
                                 <div class="d-flex justify-content-between mb-3">
                                     <strong>Total:</strong>
-                                    <strong class="text-primary" id="final-total">@ViewBag.Total.ToString("C")</strong>
+                                    <strong class="text-primary" id="final-total">@ViewBag.Total.ToString("F2")</strong>
                                 </div>
-                                <!-- Quick Checkout Button -->
+                                <!-- Primary Checkout Button -->
+                                <a asp-controller="Order" asp-action="Checkout" class="btn btn-success btn-block btn-lg mb-2">
+                                    <i class="fas fa-credit-card"></i> Proceed to Checkout
+                                </a>
+                                
+                                <!-- Quick Checkout Option (for existing customers) -->
                                 <form asp-controller="Order" asp-action="QuickCheckout" method="post" class="mb-2">
-                                    <button type="submit" class="btn btn-success btn-block btn-lg" onclick="return confirm('Create order with default shipping info? You can update details later.')">
-                                        <i class="fas fa-bolt"></i> Quick Checkout
+                                    <button type="submit" class="btn btn-outline-warning btn-block" onclick="return confirm('Create order with default shipping info? This will use placeholder address that needs to be updated later.')">
+                                        <i class="fas fa-bolt"></i> Quick Order (Update Address Later)
                                     </button>
                                 </form>
-                                
-                                <!-- Regular Checkout Button -->
-                                <a asp-controller="Order" asp-action="Checkout" class="btn btn-primary btn-block btn-lg">
-                                    <i class="fas fa-credit-card"></i> Full Checkout
-                                </a>
                                 
                                 <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary btn-block mt-2">
                                     <i class="fas fa-arrow-left"></i> Continue Shopping

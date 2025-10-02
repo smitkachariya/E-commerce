@@ -1,0 +1,401 @@
+@model E_commerce.Models.SalesAnalyticsViewModel
+@{
+    ViewData["Title"] = "Sales Analytics";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-chart-line text-primary"></i> Sales Analytics</h1>
+                <div class="btn-group" role="group">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a asp-action="InventoryManager" class="btn btn-primary">
+                        <i class="fas fa-boxes"></i> Inventory Manager
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                @Model.TotalRevenue.ToString("F2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Orders
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                @Model.TotalOrders.ToString("N0")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Average Order Value
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                @Model.AverageOrderValue.ToString("F2")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Monthly Revenue Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-area"></i> Monthly Revenue Trend (Last 12 Months)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyRevenueChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Sales Chart -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-line"></i> Daily Sales (Last 30 Days)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="dailySalesChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products and Monthly Breakdown -->
+    <div class="row">
+        <!-- Top Selling Products -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-medal"></i> Top Selling Products
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Product</th>
+                                    <th>Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.TopProducts.Count; i++)
+                                {
+                                    var product = Model.TopProducts[i];
+                                    <tr>
+                                        <td>
+                                            @if (i == 0)
+                                            {
+                                                <i class="fas fa-trophy text-warning"></i>
+                                            }
+                                            else if (i == 1)
+                                            {
+                                                <i class="fas fa-medal text-secondary"></i>
+                                            }
+                                            else if (i == 2)
+                                            {
+                                                <i class="fas fa-medal text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <span class="font-weight-bold">@(i + 1)</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="font-weight-bold">@product.ProductName</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-primary">@product.TotalSold</span>
+                                        </td>
+                                        <td class="font-weight-bold text-success">@product.TotalRevenue.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue Breakdown -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-calendar-alt"></i> Monthly Revenue Breakdown
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Orders</th>
+                                    <th>Revenue</th>
+                                    <th>Avg Order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var month in Model.MonthlyRevenue.OrderByDescending(m => m.Year).ThenByDescending(m => m.Month).Take(6))
+                                {
+                                    <tr>
+                                        <td class="font-weight-bold">@month.MonthName</td>
+                                        <td>
+                                            <span class="badge badge-info">@month.OrderCount</span>
+                                        </td>
+                                        <td class="font-weight-bold text-success">@month.Revenue.ToString("F2")</td>
+                                        <td>@((month.OrderCount > 0 ? month.Revenue / month.OrderCount : 0).ToString("F2"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-lightbulb"></i> Performance Insights
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <i class="fas fa-trending-up fa-3x text-success mb-2"></i>
+                                <h6>Revenue Growth</h6>
+                                @{
+                                    var currentMonth = Model.MonthlyRevenue.OrderByDescending(m => m.Year).ThenByDescending(m => m.Month).FirstOrDefault();
+                                    var previousMonth = Model.MonthlyRevenue.OrderByDescending(m => m.Year).ThenByDescending(m => m.Month).Skip(1).FirstOrDefault();
+                                    var growth = currentMonth != null && previousMonth != null && previousMonth.Revenue > 0 
+                                        ? ((currentMonth.Revenue - previousMonth.Revenue) / previousMonth.Revenue * 100) 
+                                        : 0;
+                                }
+                                <p class="@(growth >= 0 ? "text-success" : "text-danger") font-weight-bold">
+                                    @(growth >= 0 ? "+" : "")@growth.ToString("F1")%
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <i class="fas fa-star fa-3x text-warning mb-2"></i>
+                                <h6>Best Performer</h6>
+                                <p class="font-weight-bold">
+                                    @(Model.TopProducts.FirstOrDefault()?.ProductName ?? "N/A")
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <i class="fas fa-clock fa-3x text-info mb-2"></i>
+                                <h6>Recent Activity</h6>
+                                <p class="font-weight-bold">
+                                    @Model.DailySales.Where(d => d.OrderCount > 0).Count() / 30.0 * 100
+                                    % Active Days
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <i class="fas fa-chart-pie fa-3x text-primary mb-2"></i>
+                                <h6>Sales Consistency</h6>
+                                @{
+                                    var avgDailySales = Model.DailySales.Average(d => d.Sales);
+                                    var consistency = avgDailySales > 0 ? "Good" : "Low";
+                                }
+                                <p class="font-weight-bold text-@(consistency == "Good" ? "success" : "warning")">
+                                    @consistency
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Monthly Revenue Chart
+        var ctxMonthly = document.getElementById('monthlyRevenueChart').getContext('2d');
+        var monthlyRevenueChart = new Chart(ctxMonthly, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.MonthlyRevenue.OrderBy(m => m.Year).ThenBy(m => m.Month).Select(m => "'" + m.MonthName + "'")))],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [@Html.Raw(string.Join(",", Model.MonthlyRevenue.OrderBy(m => m.Year).ThenBy(m => m.Month).Select(m => m.Revenue)))],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: ' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Daily Sales Chart
+        var ctxDaily = document.getElementById('dailySalesChart').getContext('2d');
+        var dailySalesChart = new Chart(ctxDaily, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.DailySales.Select(d => "'" + d.DateString + "'")))],
+                datasets: [{
+                    label: 'Daily Sales',
+                    data: [@Html.Raw(string.Join(",", Model.DailySales.Select(d => d.Sales)))],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return value.toFixed(0);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Sales: ' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Auto-refresh every 15 minutes
+        setTimeout(function() {
+            location.reload();
+        }, 900000);
+    </script>
+}
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    
+    .card {
+        transition: transform 0.15s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    }
+    
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+    
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+</style>

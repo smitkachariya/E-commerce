@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @* Optional per-page styles section *@
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
@@ -42,7 +44,8 @@
                                     </a>
                                 </li>
                             }
-                            @if (User.IsInRole("Customer"))
+                            <!-- Only non-sellers can see My Orders (buyers) -->
+                            @if (!User.IsInRole("Seller"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Order" asp-action="MyOrders">
@@ -52,6 +55,11 @@
                             }
                             @if (User.IsInRole("Seller"))
                             {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="SellerDashboard" asp-action="Index">
+                                        <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+                                    </a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Products" asp-action="MyProducts">
                                         <i class="fas fa-store mr-1"></i>My Products
