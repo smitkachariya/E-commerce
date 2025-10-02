@@ -57,6 +57,13 @@ namespace E_commerce.Models
         public decimal ShippingCost { get; set; } = 0;
         public decimal Tax { get; set; }
         public decimal Total { get; set; }
+
+        // Saved addresses support
+        public List<CustomerAddress> SavedAddresses { get; set; } = new List<CustomerAddress>();
+        public int? SelectedAddressId { get; set; }
+        public bool UseSavedAddress => SelectedAddressId.HasValue;
+        public bool SaveThisAddress { get; set; }
+        public bool MakeDefault { get; set; }
     }
 
     public class OrderConfirmationViewModel

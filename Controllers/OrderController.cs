@@ -41,6 +41,16 @@ namespace E_commerce.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+
+            // Load saved addresses
+            var savedAddresses = await _context.CustomerAddresses
+                .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.IsDefault)
+                .ThenBy(a => a.Label)
+                .ToListAsync();
+
+            var selected = savedAddresses.FirstOrDefault(a => a.IsDefault) ?? savedAddresses.FirstOrDefault();
+
             var viewModel = new CheckoutViewModel
             {
                 ContactName = user.UserName,
@@ -49,8 +59,20 @@ namespace E_commerce.Controllers
                 SubTotal = cartItems.Sum(c => c.Product.Price * c.Quantity),
                 ShippingCost = 0,
                 Tax = cartItems.Sum(c => c.Product.Price * c.Quantity) * 0.10m,
-                Total = cartItems.Sum(c => c.Product.Price * c.Quantity) * 1.10m
+                Total = cartItems.Sum(c => c.Product.Price * c.Quantity) * 1.10m,
+                SavedAddresses = savedAddresses
             };
+
+            if (selected != null)
+            {
+                viewModel.SelectedAddressId = selected.CustomerAddressId;
+                viewModel.ShippingAddress = selected.Street;
+                viewModel.ShippingCity = selected.City;
+                viewModel.ShippingPostalCode = selected.PostalCode;
+                viewModel.ShippingCountry = selected.Country;
+                viewModel.ContactName = selected.RecipientName;
+                viewModel.ContactPhone = selected.Phone;
+            }
 
             return View(viewModel);
         }
@@ -68,6 +90,11 @@ namespace E_commerce.Controllers
                     .Include(c => c.Product)
                     .ThenInclude(p => p.Images)
                     .Where(c => c.UserId == userId)
+                    .ToListAsync();
+                model.SavedAddresses = await _context.CustomerAddresses
+                    .Where(a => a.UserId == userId)
+                    .OrderByDescending(a => a.IsDefault)
+                    .ThenBy(a => a.Label)
                     .ToListAsync();
                 
                 model.SubTotal = model.CartItems.Sum(c => c.Product.Price * c.Quantity);
@@ -100,6 +127,22 @@ namespace E_commerce.Controllers
                 }
             }
 
+            // If user selected a saved address, override form fields
+            if (model.SelectedAddressId.HasValue)
+            {
+                var saved = await _context.CustomerAddresses
+                    .FirstOrDefaultAsync(a => a.CustomerAddressId == model.SelectedAddressId && a.UserId == customerId);
+                if (saved != null)
+                {
+                    model.ShippingAddress = saved.Street;
+                    model.ShippingCity = saved.City;
+                    model.ShippingPostalCode = saved.PostalCode;
+                    model.ShippingCountry = saved.Country;
+                    model.ContactName = saved.RecipientName;
+                    model.ContactPhone = saved.Phone;
+                }
+            }
+
             // Create order
             var order = new Order
             {
@@ -120,6 +163,37 @@ namespace E_commerce.Controllers
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+
+            // Save new address if requested and not using existing saved one
+            if (!model.SelectedAddressId.HasValue && model.SaveThisAddress)
+            {
+                // If making default, unset previous default
+                if (model.MakeDefault)
+                {
+                    var existingDefaults = await _context.CustomerAddresses
+                        .Where(a => a.UserId == customerId && a.IsDefault)
+                        .ToListAsync();
+                    foreach (var def in existingDefaults)
+                    {
+                        def.IsDefault = false;
+                    }
+                }
+
+                var newAddress = new CustomerAddress
+                {
+                    UserId = customerId,
+                    Label = string.IsNullOrWhiteSpace(model.ShippingAddress) ? "Address" : (model.ShippingAddress.Length > 25 ? model.ShippingAddress.Substring(0,25) : model.ShippingAddress),
+                    RecipientName = model.ContactName,
+                    Phone = model.ContactPhone,
+                    Street = model.ShippingAddress,
+                    City = model.ShippingCity,
+                    State = null,
+                    PostalCode = model.ShippingPostalCode,
+                    Country = model.ShippingCountry,
+                    IsDefault = model.MakeDefault || !(await _context.CustomerAddresses.AnyAsync(a => a.UserId == customerId))
+                };
+                _context.CustomerAddresses.Add(newAddress);
+            }
 
             // Create order items and update stock
             foreach (var cartItem in cartItems)

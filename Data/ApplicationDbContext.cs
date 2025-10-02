@@ -15,10 +15,20 @@ namespace E_commerce.Data
 		public DbSet<Order> Orders { get; set; }
 		public DbSet<OrderItem> OrderItems { get; set; }
 		public DbSet<CartItem> CartItems { get; set; }
+		public DbSet<CustomerAddress> CustomerAddresses { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
+			// CustomerAddress configuration
+			modelBuilder.Entity<CustomerAddress>()
+				.HasOne(a => a.User)
+				.WithMany() // could be extended to a collection later
+				.HasForeignKey(a => a.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			// Optional: unique default per user enforced at application layer; could add filtered index in newer EF versions
 
 			// Configure decimal precision for prices
 			modelBuilder.Entity<Product>()
