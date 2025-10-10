@@ -53,7 +53,7 @@ namespace E_commerce.Controllers
 				// Redirect based on role
 				if (model.Role == "Seller")
 				{
-					return RedirectToAction("Dashboard", "Seller");
+					return RedirectToAction("Index", "SellerDashboard");
 				}
 				else
 				{
@@ -97,13 +97,9 @@ namespace E_commerce.Controllers
 
 				// Get user and check their role for redirection
 				var user = await _userManager.FindByEmailAsync(model.Email);
-				if (await _userManager.IsInRoleAsync(user, "Admin"))
+				if (await _userManager.IsInRoleAsync(user, "Seller"))
 				{
-					return RedirectToAction("Dashboard", "Admin");
-				}
-				else if (await _userManager.IsInRoleAsync(user, "Seller"))
-				{
-					return RedirectToAction("Dashboard", "Seller");
+					return RedirectToAction("Index", "SellerDashboard");
 				}
 				else
 				{

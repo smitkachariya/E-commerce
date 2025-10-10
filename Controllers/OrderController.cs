@@ -127,8 +127,8 @@ namespace E_commerce.Controllers
                 }
             }
 
-            // If user selected a saved address, override form fields
-            if (model.SelectedAddressId.HasValue)
+            // If user selected a saved address and didn't choose to use a new one, override form fields
+            if (!model.UsingNewAddress && model.SelectedAddressId.HasValue)
             {
                 var saved = await _context.CustomerAddresses
                     .FirstOrDefaultAsync(a => a.CustomerAddressId == model.SelectedAddressId && a.UserId == customerId);
@@ -165,7 +165,7 @@ namespace E_commerce.Controllers
             await _context.SaveChangesAsync();
 
             // Save new address if requested and not using existing saved one
-            if (!model.SelectedAddressId.HasValue && model.SaveThisAddress)
+            if ((model.UsingNewAddress || !model.SelectedAddressId.HasValue) && model.SaveThisAddress)
             {
                 // If making default, unset previous default
                 if (model.MakeDefault)
@@ -250,86 +250,6 @@ namespace E_commerce.Controllers
             return View(viewModel);
         }
 
-        // POST: Order/QuickCheckout - Creates order with default shipping info
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> QuickCheckout()
-        {
-            var customerId = _userManager.GetUserId(User);
-            var cartItems = await _context.CartItems
-                .Include(c => c.Product)
-                .ThenInclude(p => p.Images)
-                .Where(c => c.UserId == customerId)
-                .ToListAsync();
-
-            if (!cartItems.Any())
-            {
-                TempData["Error"] = "Your cart is empty.";
-                return RedirectToAction("Index", "Cart");
-            }
-
-            // Check stock availability
-            foreach (var cartItem in cartItems)
-            {
-                if (cartItem.Product.Stock < cartItem.Quantity)
-                {
-                    TempData["Error"] = $"Sorry, {cartItem.Product.Name} doesn't have enough stock. Available: {cartItem.Product.Stock}";
-                    return RedirectToAction("Index", "Cart");
-                }
-            }
-
-            var user = await _userManager.GetUserAsync(User);
-            var total = cartItems.Sum(c => c.Product.Price * c.Quantity) * 1.10m; // Including 10% tax
-
-            // Create order with default/minimal information
-            var order = new Order
-            {
-                CustomerId = customerId,
-                OrderDate = DateTime.Now,
-                Status = OrderStatus.Pending,
-                TotalAmount = total,
-                ShippingAddress = "Default Address - Please update in order details",
-                ShippingCity = "Default City",
-                ShippingPostalCode = "00000",
-                ShippingCountry = "United States",
-                ContactName = user.UserName ?? "Customer",
-                ContactPhone = "000-000-0000",
-                ContactEmail = user.Email ?? "customer@example.com",
-                Notes = "Quick checkout order - shipping details may need updating",
-                OrderNumber = GenerateOrderNumber()
-            };
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            // Create order items and update stock
-            foreach (var cartItem in cartItems)
-            {
-                var orderItem = new OrderItem
-                {
-                    OrderId = order.OrderId,
-                    ProductId = cartItem.ProductId,
-                    Quantity = cartItem.Quantity,
-                    Price = cartItem.Product.Price,
-                    ProductName = cartItem.Product.Name,
-                    ProductCategory = cartItem.Product.Category,
-                    ProductImagePath = cartItem.Product.Images.FirstOrDefault()?.ImagePath
-                };
-
-                _context.OrderItems.Add(orderItem);
-
-                // Update product stock
-                cartItem.Product.Stock -= cartItem.Quantity;
-            }
-
-            // Clear cart
-            _context.CartItems.RemoveRange(cartItems);
-            
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Your order has been placed successfully! You can update shipping details in My Orders.";
-            return RedirectToAction("OrderConfirmation", new { orderId = order.OrderId });
-        }
 
         // GET: Order/MyOrders
         [Authorize]
@@ -370,6 +290,39 @@ namespace E_commerce.Controllers
                 Roles = roles,
                 IsCustomer = isCustomer,
                 IsSeller = isSeller 
+            });
+        }
+
+        // GET: Order/DebugSavedAddresses - Diagnostic: list saved addresses for current user
+        [Authorize]
+        public async Task<IActionResult> DebugSavedAddresses()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.GetUserAsync(User);
+            var addresses = await _context.CustomerAddresses
+                .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.IsDefault)
+                .ThenBy(a => a.Label)
+                .Select(a => new {
+                    a.CustomerAddressId,
+                    a.Label,
+                    a.RecipientName,
+                    a.Phone,
+                    a.Street,
+                    a.City,
+                    a.State,
+                    a.PostalCode,
+                    a.Country,
+                    a.IsDefault,
+                    a.CreatedAt
+                })
+                .ToListAsync();
+
+            return Json(new {
+                UserId = userId,
+                Email = user?.Email,
+                AddressCount = addresses.Count,
+                Addresses = addresses
             });
         }
 

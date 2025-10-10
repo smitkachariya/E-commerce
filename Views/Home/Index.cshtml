@@ -144,24 +144,7 @@
                                     </a>
                                 </div>
                             }
-                            else if (User.IsInRole("Admin"))
-                            {
-                                <div class="col-md-4">
-                                    <a asp-controller="Admin" asp-action="ManageUsers" class="btn btn-outline-primary w-100">
-                                        <i class="fas fa-users me-2"></i>Manage Users
-                                    </a>
-                                </div>
-                                <div class="col-md-4">
-                                    <a asp-controller="Admin" asp-action="ManageProducts" class="btn btn-outline-success w-100">
-                                        <i class="fas fa-box me-2"></i>Manage Products
-                                    </a>
-                                </div>
-                                <div class="col-md-4">
-                                    <a asp-controller="Admin" asp-action="ManageOrders" class="btn btn-outline-info w-100">
-                                        <i class="fas fa-shopping-cart me-2"></i>Manage Orders
-                                    </a>
-                                </div>
-                            }
+                            @* Admin panel removed *@
                         </div>
                     </div>
                 </div>

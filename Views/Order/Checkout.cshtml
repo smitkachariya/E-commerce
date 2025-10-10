@@ -19,11 +19,25 @@
                         @if (Model.SavedAddresses != null && Model.SavedAddresses.Any())
                         {
                             <div class="mb-4 p-3 border rounded bg-light">
-                                <h5 class="mb-3"><i class="fas fa-address-book mr-2"></i>Saved Addresses</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0"><i class="fas fa-address-book mr-2"></i>Saved Addresses</h5>
+                                    <div class="small">
+                                        <a asp-controller="Addresses" asp-action="Index" class="text-decoration-none">
+                                            Manage addresses
+                                        </a>
+                                    </div>
+                                </div>
                                 @foreach (var addr in Model.SavedAddresses)
                                 {
                                     <div class="custom-control custom-radio mb-2">
-                                        <input type="radio" class="custom-control-input" id="addr_@addr.CustomerAddressId" name="SelectedAddressId" value="@addr.CustomerAddressId" @(Model.SelectedAddressId == addr.CustomerAddressId ? "checked" : "") />
+                                        <input type="radio" class="custom-control-input saved-address-radio" id="addr_@addr.CustomerAddressId" name="SelectedAddressId" value="@addr.CustomerAddressId"
+                                               data-street="@addr.Street"
+                                               data-city="@addr.City"
+                                               data-postal="@addr.PostalCode"
+                                               data-country="@addr.Country"
+                                               data-recipient="@addr.RecipientName"
+                                               data-phone="@addr.Phone"
+                                               @(Model.SelectedAddressId == addr.CustomerAddressId ? "checked" : "") />
                                         <label class="custom-control-label" for="addr_@addr.CustomerAddressId">
                                             <strong>@addr.Label</strong> - @addr.Street, @addr.City (@addr.PostalCode) @if(addr.IsDefault){<span class="badge badge-primary ml-1">Default</span>}
                                             <br /><small>@addr.RecipientName • @addr.Phone</small>
@@ -36,6 +50,16 @@
                                     <input type="checkbox" class="custom-control-input" id="useNewAddressToggle" onchange="toggleNewAddress(this)">
                                     <label class="custom-control-label" for="useNewAddressToggle">Use a new address instead</label>
                                 </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info py-2">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                No saved addresses for this account yet.
+                                <a asp-controller="Addresses" asp-action="Create" class="ml-1">Add one</a>
+                                or
+                                <a asp-controller="Addresses" asp-action="Index" class="ml-1">manage addresses</a>.
                             </div>
                         }
 
@@ -75,7 +99,7 @@
                             <i class="fas fa-shipping-fast mr-2"></i><span>Shipping Address</span>
                             <small class="text-muted ml-2" id="addressModeInfo">@(Model.SavedAddresses.Any() ? "(Using selected saved address)" : "(New address)")</small>
                         </h5>
-                        <input type="hidden" id="isUsingNewAddress" value="@(Model.SavedAddresses.Any() ? "false" : "true")" />
+                        <input type="hidden" id="isUsingNewAddress" name="UsingNewAddress" value="@(Model.SavedAddresses.Any() ? "false" : "true")" />
                         <div class="form-group">
                             <label asp-for="ShippingAddress" class="font-weight-bold"></label>
                             <input asp-for="ShippingAddress" class="form-control" placeholder="Enter your street address" />
@@ -231,15 +255,84 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
+        function setAddressFieldsEnabled(enabled) {
+            const ids = ['ShippingAddress','ShippingCity','ShippingPostalCode','ShippingCountry','ContactName','ContactPhone'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = !enabled;
+            });
+        }
+
+        function fillAddressFieldsFromRadio(radio) {
+            if (!radio) return;
+            const map = {
+                'ShippingAddress': radio.dataset.street,
+                'ShippingCity': radio.dataset.city,
+                'ShippingPostalCode': radio.dataset.postal,
+                'ShippingCountry': radio.dataset.country,
+                'ContactName': radio.dataset.recipient,
+                'ContactPhone': radio.dataset.phone
+            };
+            Object.keys(map).forEach(id => {
+                const el = document.getElementById(id);
+                if (el && typeof map[id] !== 'undefined') el.value = map[id] || '';
+            });
+        }
+
+        function applySavedSelection() {
+            const checked = document.querySelector("input[name='SelectedAddressId']:checked");
+            if (checked) {
+                fillAddressFieldsFromRadio(checked);
+                setAddressFieldsEnabled(false);
+                document.getElementById('isUsingNewAddress').value = 'false';
+                document.getElementById('saveAddressOptions').style.display = 'none';
+                document.getElementById('addressModeInfo').innerText = '(Using selected saved address)';
+            }
+        }
+
         function toggleNewAddress(cb) {
             const usingNew = cb.checked;
             document.getElementById('isUsingNewAddress').value = usingNew;
             document.getElementById('saveAddressOptions').style.display = usingNew ? 'flex' : 'none';
             document.getElementById('addressModeInfo').innerText = usingNew ? '(New address)' : '(Using selected saved address)';
-            // If reverting to saved address, clear manual inputs (optional)
-            if (!usingNew) {
-                // Do not clear fields; they will be overridden on server if a saved address was selected
+
+            const radios = document.querySelectorAll("input[name='SelectedAddressId']");
+            radios.forEach(r => {
+                r.disabled = usingNew;
+                if (usingNew) r.checked = false;
+            });
+
+            if (usingNew) {
+                // Enable and clear input fields for new address
+                setAddressFieldsEnabled(true);
+                ['ShippingAddress','ShippingCity','ShippingPostalCode','ShippingCountry','ContactName','ContactPhone'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+            } else {
+                // Re-apply saved selection
+                applySavedSelection();
             }
         }
+
+        // When a saved address radio is selected, populate fields and keep them disabled
+        document.querySelectorAll('.saved-address-radio').forEach(r => {
+            r.addEventListener('change', () => {
+                fillAddressFieldsFromRadio(r);
+                setAddressFieldsEnabled(false);
+                document.getElementById('isUsingNewAddress').value = 'false';
+                document.getElementById('saveAddressOptions').style.display = 'none';
+                document.getElementById('addressModeInfo').innerText = '(Using selected saved address)';
+            });
+        });
+
+        // On load, if there are saved addresses and we're not using a new one, enforce disabled state and populate from selected
+        (function initAddressMode(){
+            const hasSaved = document.querySelectorAll("input[name='SelectedAddressId']").length > 0;
+            const usingNew = document.getElementById('isUsingNewAddress').value === 'true';
+            if (hasSaved && !usingNew) {
+                applySavedSelection();
+            }
+        })();
     </script>
 }

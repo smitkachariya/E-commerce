@@ -64,6 +64,8 @@ namespace E_commerce.Models
         public bool UseSavedAddress => SelectedAddressId.HasValue;
         public bool SaveThisAddress { get; set; }
         public bool MakeDefault { get; set; }
+        // Explicit toggle to indicate user chose to use a new address instead of saved
+        public bool UsingNewAddress { get; set; }
     }
 
     public class OrderConfirmationViewModel

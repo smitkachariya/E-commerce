@@ -34,10 +34,14 @@ namespace E_commerce.Controllers
                 .Include(p => p.Images)
                 .ToListAsync();
 
-            // Get sales data from orders
+            // Get sales data from orders (exclude cancelled/returned)
             var orderItems = await _context.OrderItems
+                .AsNoTracking()
                 .Include(oi => oi.Order)
-                .Where(oi => _context.Products.Any(p => p.ProductId == oi.ProductId && p.SellerId == sellerId))
+                .Where(oi => oi.Product.SellerId == sellerId
+                             && oi.Order != null
+                             && oi.Order.Status != OrderStatus.Cancelled
+                             && oi.Order.Status != OrderStatus.Returned)
                 .ToListAsync();
 
             // Calculate dashboard metrics
@@ -110,8 +114,12 @@ namespace E_commerce.Controllers
             foreach (var product in products)
             {
                 var orderItems = await _context.OrderItems
+                    .AsNoTracking()
                     .Include(oi => oi.Order)
-                    .Where(oi => oi.ProductId == product.ProductId)
+                    .Where(oi => oi.ProductId == product.ProductId
+                                 && oi.Order != null
+                                 && oi.Order.Status != OrderStatus.Cancelled
+                                 && oi.Order.Status != OrderStatus.Returned)
                     .ToListAsync();
 
                 var totalSold = orderItems.Sum(oi => oi.Quantity);
@@ -169,8 +177,12 @@ namespace E_commerce.Controllers
             var sellerId = _userManager.GetUserId(User);
             
             var orderItems = await _context.OrderItems
+                .AsNoTracking()
                 .Include(oi => oi.Order)
-                .Where(oi => _context.Products.Any(p => p.ProductId == oi.ProductId && p.SellerId == sellerId))
+                .Where(oi => oi.Product.SellerId == sellerId
+                             && oi.Order != null
+                             && oi.Order.Status != OrderStatus.Cancelled
+                             && oi.Order.Status != OrderStatus.Returned)
                 .ToListAsync();
 
             var analytics = new SalesAnalyticsViewModel

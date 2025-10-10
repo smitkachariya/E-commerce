@@ -28,7 +28,12 @@ namespace E_commerce.Data
 				.HasForeignKey(a => a.UserId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// Optional: unique default per user enforced at application layer; could add filtered index in newer EF versions
+			// Optional: unique default per user enforced at application layer; also enforce at DB level via filtered index
+			modelBuilder.Entity<CustomerAddress>()
+				.HasIndex(a => a.UserId)
+				.HasFilter("[IsDefault] = 1")
+				.IsUnique()
+				.HasName("IX_CustomerAddresses_User_Default");
 
 			// Configure decimal precision for prices
 			modelBuilder.Entity<Product>()
@@ -70,6 +75,11 @@ namespace E_commerce.Data
 				.HasForeignKey(ci => ci.ProductId)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			// Ensure only one row per user/product in cart
+			modelBuilder.Entity<CartItem>()
+				.HasIndex(ci => new { ci.UserId, ci.ProductId })
+				.IsUnique();
+
 			// Configure Order relationships
 			modelBuilder.Entity<Order>()
 				.HasOne(o => o.Customer)
@@ -89,7 +99,14 @@ namespace E_commerce.Data
 				.HasForeignKey(oi => oi.ProductId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-			// Seed categories (optional)
+			// Helpful lookup indexes
+			modelBuilder.Entity<Product>()
+				.HasIndex(p => p.Category);
+
+			modelBuilder.Entity<Order>()
+				.HasIndex(o => new { o.CustomerId, o.OrderDate });
+
+			// Seed categories (optional placeholder)
 			modelBuilder.Entity<Product>().HasData();
 		}
 	}

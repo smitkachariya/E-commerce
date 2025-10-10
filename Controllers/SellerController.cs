@@ -8,7 +8,8 @@ namespace E_commerce.Controllers
     {
         public IActionResult Dashboard()
         {
-            return View();
+            // Redirect legacy seller dashboard route to the data-driven dashboard
+            return RedirectToAction("Index", "SellerDashboard");
         }
     }
 }

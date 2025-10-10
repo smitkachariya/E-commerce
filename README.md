@@ -38,7 +38,7 @@ A comprehensive ASP.NET Core e-commerce application with advanced seller dashboa
 
 ### 🔐 Authentication & Authorization
 
-- **Complete Role-Based System**: Customer, Seller, and Admin roles
+- **Role-Based System**: Customer and Seller roles
 - **Styled Registration Page**: Interactive role selection with visual cards
 - **Enhanced Login Page**: Modern design with FontAwesome icons
 - **Role-Based Navigation**: Dynamic navbar based on user roles
@@ -51,7 +51,7 @@ A comprehensive ASP.NET Core e-commerce application with advanced seller dashboa
 - **FontAwesome Icons**: Beautiful icons throughout the application
 - **Interactive Role Selection**: Hover effects and animations
 - **Custom CSS Styling**: Enhanced visual appeal with custom styles
-- **Dashboard Layouts**: Separate dashboards for Seller and Admin roles
+- **Dashboard**: Seller dashboard
 
 ### 🏗️ Application Structure
 
@@ -122,18 +122,14 @@ A comprehensive ASP.NET Core e-commerce application with advanced seller dashboa
 
 ### 🔧 Admin Role
 
-- Access admin dashboard
-- Manage all users
-- Manage all products
-- Manage all orders
-- View system statistics
+Admin panel has been removed in this build.
 
 ## 🗄️ Database Schema
 
 ### Users (Identity)
 
 - Extended ApplicationUser with FirstName, LastName
-- Role-based authentication (Customer, Seller, Admin)
+- Role-based authentication (Customer, Seller)
 
 ### Products
 
@@ -170,7 +166,6 @@ A comprehensive ASP.NET Core e-commerce application with advanced seller dashboa
 ### Dashboards
 
 - **Seller Dashboard**: Quick stats and actions for sellers
-- **Admin Dashboard**: System overview and management tools
 - **Responsive Cards**: Beautiful card-based layouts
 
 ## 🔄 Next Steps (Coming Soon)
@@ -215,7 +210,7 @@ E-commerce/
 │   ├── AccountController.cs
 │   ├── HomeController.cs
 │   ├── SellerController.cs
-│   ├── AdminController.cs
+│   ├── (Admin controller removed)
 │   └── ...
 ├── Models/              # Data Models
 │   ├── ApplicationUser.cs
@@ -225,7 +220,7 @@ E-commerce/
 │   ├── Account/
 │   ├── Home/
 │   ├── Seller/
-│   ├── Admin/
+│   ├── (Admin views removed)
 │   └── Shared/
 ├── Data/                # Database Context
 ├── wwwroot/             # Static Files
@@ -254,7 +249,7 @@ E-commerce/
 - Payment integration
 - Advanced search and filtering
 - Email notifications
-- Admin user management
+- Admin user management (removed)
 
 ## 🤝 Contributing
 
