@@ -41,7 +41,7 @@ namespace E_commerce.Models
 
         [Required]
         [StringLength(100)]
-        public string Country { get; set; } = "United States";
+        public string Country { get; set; } = "India";
 
         public bool IsDefault { get; set; }
 

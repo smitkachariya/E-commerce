@@ -36,11 +36,11 @@
                                 Total Inventory Value
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.TotalInventoryValue.ToString("F2")
+                                ₹ @Model.TotalInventoryValue.ToString("F2")
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-rupee-sign fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                                 Total Revenue
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.TotalRevenue.ToString("F2")
+                                ₹ @Model.TotalRevenue.ToString("F2")
                             </div>
                         </div>
                         <div class="col-auto">
@@ -147,7 +147,7 @@
                         <div class="mb-3">
                             <div class="d-flex justify-content-between">
                                 <span class="font-weight-bold">@category.Category</span>
-                                <span class="text-success">@category.TotalValue.ToString("F2")</span>
+                                <span class="text-success">₹ @category.TotalValue.ToString("F2")</span>
                             </div>
                             <div class="text-muted small">
                                 @category.ProductCount products • @category.TotalStock in stock
@@ -210,9 +210,9 @@
                                                 @item.Product.Stock
                                             </span>
                                         </td>
-                                        <td class="font-weight-bold text-primary">@item.CurrentInventoryValue.ToString("F2")</td>
+                                        <td class="font-weight-bold text-primary">₹ @item.CurrentInventoryValue.ToString("F2")</td>
                                         <td>@item.TotalSold</td>
-                                        <td class="font-weight-bold text-success">@item.TotalRevenue.ToString("F2")</td>
+                                        <td class="font-weight-bold text-success">₹ @item.TotalRevenue.ToString("F2")</td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Product.ProductId" 
@@ -250,7 +250,7 @@
                             <div class="mb-3 p-2 border-left-primary border-left-2">
                                 <div class="d-flex justify-content-between">
                                     <strong>@order.ProductName</strong>
-                                    <span class="text-success">@order.Price.ToString("F2")</span>
+                                    <span class="text-success">₹ @order.Price.ToString("F2")</span>
                                 </div>
                                 <div class="text-muted small">
                                     Qty: @order.Quantity • @order.Order.OrderDate.ToString("MMM dd, HH:mm")

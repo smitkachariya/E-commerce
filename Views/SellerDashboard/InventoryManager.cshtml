@@ -32,11 +32,11 @@
                                 Total Inventory Value
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.Sum(p => p.CurrentInventoryValue).ToString("F2")
+                                ₹ @Model.Sum(p => p.CurrentInventoryValue).ToString("F2")
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-rupee-sign fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                                 Total Revenue
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @Model.Sum(p => p.TotalRevenue).ToString("F2")
+                                ₹ @Model.Sum(p => p.TotalRevenue).ToString("F2")
                             </div>
                         </div>
                         <div class="col-auto">
@@ -203,7 +203,7 @@
                                         <td>
                                             <span class="badge badge-secondary">@item.Product.Category</span>
                                         </td>
-                                        <td class="font-weight-bold text-primary">@item.Product.Price.ToString("F2")</td>
+                                        <td class="font-weight-bold text-primary">₹ @item.Product.Price.ToString("F2")</td>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <span class="badge @item.GetStockStatusClass() mr-2">
@@ -212,9 +212,9 @@
                                                 <small class="text-muted">@item.StockStatus</small>
                                             </div>
                                         </td>
-                                        <td class="font-weight-bold text-success">@item.CurrentInventoryValue.ToString("F2")</td>
+                                        <td class="font-weight-bold text-success">₹ @item.CurrentInventoryValue.ToString("F2")</td>
                                         <td>@item.TotalSold</td>
-                                        <td class="font-weight-bold text-success">@item.TotalRevenue.ToString("F2")</td>
+                                        <td class="font-weight-bold text-success">₹ @item.TotalRevenue.ToString("F2")</td>
                                         <td>@item.AverageSalesPerMonth.ToString("F1")</td>
                                         <td>
                                             @if (item.RecommendedRestock > 0)

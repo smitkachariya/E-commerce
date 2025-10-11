@@ -28,11 +28,14 @@
                                 <i class="fas fa-home mr-1"></i>Home
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Products" asp-action="Index">
-                                <i class="fas fa-th-large mr-1"></i>Products
-                            </a>
-                        </li>
+                        @if (!(User?.Identity?.IsAuthenticated ?? false) || !User.IsInRole("Seller"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Products" asp-action="Index">
+                                    <i class="fas fa-th-large mr-1"></i>Products
+                                </a>
+                            </li>
+                        }
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
                             @if (User.IsInRole("Customer") || !User.IsInRole("Seller"))

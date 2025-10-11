@@ -82,6 +82,32 @@ namespace E_commerce.Controllers
         [Authorize]
         public async Task<IActionResult> Checkout(CheckoutViewModel model)
         {
+            // If user chose a saved address (not a new one), populate the model from DB BEFORE validation
+            // Disabled inputs are not posted, so required validators would fail unless we prefill here.
+            var prefillCustomerId = _userManager.GetUserId(User);
+            if (!model.UsingNewAddress && model.SelectedAddressId.HasValue)
+            {
+                var saved = await _context.CustomerAddresses
+                    .FirstOrDefaultAsync(a => a.CustomerAddressId == model.SelectedAddressId && a.UserId == prefillCustomerId);
+
+                if (saved != null)
+                {
+                    // Remove existing empty values from ModelState so validation re-evaluates with the populated values
+                    foreach (var key in new[] { "ShippingAddress", "ShippingCity", "ShippingPostalCode", "ShippingCountry", "ContactName", "ContactPhone" })
+                    {
+                        if (ModelState.ContainsKey(key)) ModelState.Remove(key);
+                    }
+
+                    // Copy values from saved address to the model
+                    model.ShippingAddress = saved.Street;
+                    model.ShippingCity = saved.City;
+                    model.ShippingPostalCode = saved.PostalCode;
+                    model.ShippingCountry = saved.Country;
+                    model.ContactName = saved.RecipientName;
+                    model.ContactPhone = saved.Phone;
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 // Reload cart items if validation fails

@@ -30,6 +30,12 @@ namespace E_commerce.Controllers
         // GET: Products (Public - Browse all products)
         public async Task<IActionResult> Index(string searchString, string category)
         {
+            // If a seller is logged in, redirect them to their product management instead of public catalog
+            if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Seller"))
+            {
+                return RedirectToAction(nameof(MyProducts));
+            }
+
             var products = _context.Products
                 .Include(p => p.Images)
                 .Include(p => p.Seller)

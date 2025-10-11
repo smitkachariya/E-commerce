@@ -17,8 +17,8 @@ namespace E_commerce.Models
         public string Description { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
-        [Display(Name = "Price ($)")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+    [Display(Name = "Price (₹)")]
         public decimal Price { get; set; }
 
         [Required]

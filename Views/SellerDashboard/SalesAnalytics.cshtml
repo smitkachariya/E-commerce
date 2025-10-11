@@ -32,11 +32,11 @@
                                 Total Revenue
                             </div>
                             <div class="h4 mb-0 font-weight-bold text-gray-800">
-                                @Model.TotalRevenue.ToString("F2")
+                                ₹ @Model.TotalRevenue.ToString("F2")
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-rupee-sign fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                                 Average Order Value
                             </div>
                             <div class="h4 mb-0 font-weight-bold text-gray-800">
-                                @Model.AverageOrderValue.ToString("F2")
+                                ₹ @Model.AverageOrderValue.ToString("F2")
                             </div>
                         </div>
                         <div class="col-auto">
@@ -165,7 +165,7 @@
                                         <td>
                                             <span class="badge badge-primary">@product.TotalSold</span>
                                         </td>
-                                        <td class="font-weight-bold text-success">@product.TotalRevenue.ToString("F2")</td>
+                                        <td class="font-weight-bold text-success">₹ @product.TotalRevenue.ToString("F2")</td>
                                     </tr>
                                 }
                             </tbody>
@@ -202,8 +202,8 @@
                                         <td>
                                             <span class="badge badge-info">@month.OrderCount</span>
                                         </td>
-                                        <td class="font-weight-bold text-success">@month.Revenue.ToString("F2")</td>
-                                        <td>@((month.OrderCount > 0 ? month.Revenue / month.OrderCount : 0).ToString("F2"))</td>
+                                        <td class="font-weight-bold text-success">₹ @month.Revenue.ToString("F2")</td>
+                                        <td>₹ @((month.OrderCount > 0 ? month.Revenue / month.OrderCount : 0).ToString("F2"))</td>
                                     </tr>
                                 }
                             </tbody>
